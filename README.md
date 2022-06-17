@@ -7,7 +7,7 @@ generate ent schema from your existing sql file.
 ## Installation
 
 ```shell
-go install github.com/panotza/pg2ent@main
+CGO_ENABLED=1 go install github.com/panotza/pg2ent@main
 ```
 
 ## Basic usage
