@@ -158,7 +158,7 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 			return "", fmt.Errorf(`"%s"."%s" is unique it cannot have default values`, table.Name, column.Name)
 		}
 		if !column.IsPrimary {
-			if !lo.Contains(ss, "Optional()") {
+			if column.IsNotNull {
 				ss = append(ss, "Optional()")
 			}
 			if !s.c.Rule.NoDefault {
