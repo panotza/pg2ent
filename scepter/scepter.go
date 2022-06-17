@@ -158,8 +158,10 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 				ss = append(ss, strings.Replace(defaultStr, "%s", column.DefaultType.Value, 1))
 			}
 			if strings.ToLower(column.DefaultType.Type) == "func" {
+				ctx.importMemo["entgo.io/ent/dialect/entsql"] = struct{}{}
 				ss = append(ss, fmt.Sprintf("Annotations(&entsql.Annotation{\n                Default: \"%s\",\n            })", column.DefaultType.Value+"()"))
 			} else if strings.ToLower(column.DefaultType.Type) == "sqlvaluefunction" {
+				ctx.importMemo["entgo.io/ent/dialect/entsql"] = struct{}{}
 				ss = append(ss, fmt.Sprintf("Annotations(&entsql.Annotation{\n                Default: \"%s\",\n            })", column.DefaultType.Value))
 			}
 		}
