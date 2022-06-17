@@ -148,12 +148,19 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 		ss = append(ss, strings.Replace(fieldStr, "%s", column.Name, 1))
 	}
 
+	if !column.IsNotNull {
+		ss = append(ss, "Nillable()")
+		ss = append(ss, "Optional()")
+	}
+
 	if column.DefaultType != nil {
 		if column.IsUnique {
 			return "", fmt.Errorf(`"%s"."%s" is unique it cannot have default values`, table.Name, column.Name)
 		}
 		if !column.IsPrimary {
-			ss = append(ss, "Optional()")
+			if !lo.Contains(ss, "Optional()") {
+				ss = append(ss, "Optional()")
+			}
 			if !s.c.Rule.NoDefault {
 				ss = append(ss, strings.Replace(defaultStr, "%s", column.DefaultType.Value, 1))
 			}
@@ -167,9 +174,6 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 		}
 	}
 
-	if !column.IsNotNull {
-		ss = append(ss, "Nillable()")
-	}
 	if column.IsUnique {
 		ss = append(ss, "Unique()")
 	}
