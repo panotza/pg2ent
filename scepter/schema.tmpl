@@ -1,0 +1,51 @@
+{{/* gotype: github.com/panotza/pg2ent/mutator.TemplateData */}}
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	{{- range $x := .Import }}
+		"{{$x}}"
+	{{- end}}
+)
+
+
+// {{ .SchemaName }} holds the schema definition for the {{ .SchemaName }} entity.
+type {{ .SchemaName }} struct {
+	ent.Schema
+}
+
+{{ if .Annotations }}
+// Annotations of the {{ .SchemaName }}.
+func ({{ .SchemaName }}) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		{{- range $x := .Annotations }}
+			{{ $x }},
+		{{- end}}
+	}
+}
+{{ end }}
+
+// Fields of the {{ .SchemaName }}.
+func ({{ .SchemaName }}) Fields() []ent.Field {
+	return []ent.Field{
+		{{- range $x := .Fields }}
+			{{ $x }},
+		{{- end}}
+	}
+}
+
+// Edges of the {{ .SchemaName }}.
+func ({{ .SchemaName }}) Edges() []ent.Edge {
+	return nil
+}
+
+// Indexes of the {{ .SchemaName }}.
+func ({{ .SchemaName }}) Indexes() []ent.Index {
+	return []ent.Index{
+		{{- range $x := .Indexes }}
+			{{ $x }},
+		{{- end}}
+	}
+}

@@ -1,0 +1,62 @@
+sql-file: table.sql
+out-dir: entschema
+format: true
+
+rule:
+  no-default: true
+  immutable-columns:
+    - created_at
+
+type:
+  int2: field.Int("%s")
+  int4: field.Int("%s")
+  int8: field.Int64("%s")
+  bigserial: field.Int64("%s")
+  float8: field.Float("%s")
+  uuid: field.UUID("%s", uuid.UUID{})
+  varchar: field.String("%s")
+  text: field.String("%s")
+  bpchar: field.String("%s")
+  timestamptz: TIME
+  bool: field.Bool("%s")
+  bytea: field.Bytes("%s")
+  jsonb: field.Bytes("%s")
+  date: DATE
+  numeric: DECIMAL
+
+define:
+  TIME:
+    field: field.Time("%s")
+    imports:
+      - time
+    default: Default(time.Now)
+  DATE:
+    field: field.Time("%s")
+    imports:
+      - github.com/foo/bar/pkg/ctype
+    go-type: ctype.Date{}
+  DECIMAL:
+    field: field.Float("%s")
+    imports:
+      - github.com/shopspring/decimal
+    go-type: decimal.Decimal{}
+    schema-type: |-
+      map[string]string{
+        dialect.Postgres: "decimal",
+      }
+
+overrides:
+  - name: stamp-time
+    matchers:
+      - prop: Type
+        value: timestamptz
+      - prop: IsNotNull
+        value: false
+      - prop: DefaultType
+        value: null
+    with: |-
+      field.Time("%s").
+        GoType(ctype.StampTime{}).
+        Optional()
+    imports:
+      - github.com/foo/bar/pkg/ctype
