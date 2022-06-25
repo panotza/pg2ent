@@ -38,14 +38,16 @@ func ParseSQL(sql string) []Table {
 					return x.Name == table
 				})
 				if !ok {
-					panic(fmt.Sprintf("cannot find %s table in table %s to create unique index", table))
+					panic(fmt.Sprintf("cannot find %s table to create unique index", table))
 				}
 
 				isUnique := value.Get("unique").Bool()
+				elems := value.Get("indexParams.#.IndexElem.name").Array()
+				isComposite := len(elems) > 1
 
 				var columns []string
-				for _, elem := range value.Get("indexParams.#.IndexElem.name").Array() {
-					column := elem.String()
+				if !isComposite {
+					column := elems[0].String()
 					_, columnIndex, ok := lo.FindIndexOf(tables[tableIndex].Columns, func(x Column) bool {
 						return x.Name == column
 					})
@@ -54,13 +56,16 @@ func ParseSQL(sql string) []Table {
 					}
 
 					tables[tableIndex].Columns[columnIndex].IsUnique = isUnique
-					columns = append(columns, column)
-				}
+				} else {
+					for _, elem := range elems {
+						columns = append(columns, elem.String())
+					}
 
-				tables[tableIndex].Indexes = append(tables[tableIndex].Indexes, Index{
-					Columns:  columns,
-					IsUnique: isUnique,
-				})
+					tables[tableIndex].Indexes = append(tables[tableIndex].Indexes, Index{
+						Columns:  columns,
+						IsUnique: isUnique,
+					})
+				}
 			}
 			return true
 		})
