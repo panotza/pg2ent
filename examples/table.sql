@@ -1,8 +1,7 @@
 create
 extension if not exists pgcrypto;
 
-create table users
-(
+create table users (
     id                  bigserial,
     username            varchar     not null,
     email               varchar     not null,
@@ -23,8 +22,14 @@ create table users
 );
 create unique index if not exists users_username_key on users (username);
 
-create table global_configs
-(
+create table user_settings (
+    user_id bigint,
+    b       bool not null default false,
+    primary key (user_id),
+    foreign key (user_id) references users (id)
+);
+
+create table global_configs (
     id          bigserial   not null,
     key         varchar     not null,
     value       varchar     not null,
@@ -37,8 +42,7 @@ create table global_configs
 );
 create unique index if not exists global_configs_key on global_configs (key);
 
-create table tokens
-(
+create table tokens (
     id         bigserial,
     code       varchar     not null,
     user_id    bigint,
@@ -49,8 +53,7 @@ create table tokens
 );
 create unique index if not exists tokens_code_key on tokens (code);
 
-create table mtm_fxs
-(
+create table mtm_fxs (
     id         uuid default gen_random_uuid(),
     value_date date not null,
     primary key (id)

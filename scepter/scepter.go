@@ -125,11 +125,17 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 		return "", fmt.Errorf(`mapping for "%s"."%s" type "%s" not found in the configuration`, table.Name, column.Name, column.Type)
 	}
 
+	columnName := column.Name
+	// custom ID Field case
+	if column.IsPrimary {
+		columnName = "id"
+	}
+
 	defaultStr := "Default(%s)"
 
 	defType, ok := s.c.Define[fieldStr]
 	if ok {
-		ss = append(ss, strings.Replace(defType.Field, "%s", column.Name, 1))
+		ss = append(ss, strings.Replace(defType.Field, "%s", columnName, 1))
 		if defType.GoType != "" {
 			ss = append(ss, fmt.Sprintf("GoType(%s)", defType.GoType))
 		}
@@ -145,7 +151,12 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 			}
 		}
 	} else {
-		ss = append(ss, strings.Replace(fieldStr, "%s", column.Name, 1))
+		ss = append(ss, strings.Replace(fieldStr, "%s", columnName, 1))
+	}
+
+	// custom ID Field case
+	if column.IsPrimary {
+		ss = append(ss, fmt.Sprintf(`StorageKey("%s")`, column.Name))
 	}
 
 	if !column.IsNotNull {
@@ -155,7 +166,7 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 
 	if column.DefaultType != nil {
 		if column.IsUnique {
-			return "", fmt.Errorf(`"%s"."%s" is unique it cannot have default values`, table.Name, column.Name)
+			return "", fmt.Errorf(`"%s"."%s" is unique it cannot have default values`, table.Name, columnName)
 		}
 		if !column.IsPrimary {
 			if column.IsNotNull {
@@ -177,7 +188,7 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 	if column.IsUnique {
 		ss = append(ss, "Unique()")
 	}
-	if lo.Contains(s.c.Rule.ImmutableColumns, column.Name) {
+	if lo.Contains(s.c.Rule.ImmutableColumns, columnName) {
 		ss = append(ss, "Immutable()")
 	}
 	return strings.Join(ss, ".\n"), nil
