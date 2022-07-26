@@ -90,7 +90,7 @@ func (s *Scepter) generateAnnotation(ctx *generateContext, table postgres.Table)
 }
 
 func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, column postgres.Column) (string, error) {
-	if column.Name == "id" && column.IsPrimary && column.Type != "uuid" {
+	if column.Name == "id" && column.IsPrimary && (column.Type == "int2" || column.Type == "int4" || column.Type == "int8" || column.Type == "serial" || column.Type == "bigserial") {
 		return "", ErrSkipField
 	}
 
@@ -155,7 +155,7 @@ func (s *Scepter) generateField(ctx *generateContext, table postgres.Table, colu
 	}
 
 	// custom ID Field case
-	if column.IsPrimary {
+	if column.IsPrimary && column.Name != "id" {
 		ss = append(ss, fmt.Sprintf(`StorageKey("%s")`, column.Name))
 	}
 

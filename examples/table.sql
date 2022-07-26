@@ -58,3 +58,9 @@ create table mtm_fxs (
     value_date date not null,
     primary key (id)
 );
+
+create table kv_settings (
+    id    varchar,
+    value varchar not null,
+    primary key (id)
+);
