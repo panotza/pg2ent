@@ -101,7 +101,7 @@ func parseCreateStmt(createStmt gjson.Result) Table {
 		case "ColumnDef":
 			column := Column{}
 			column.Name = value.Get("colname").String()
-			column.Type = parseJsonColumnTypeName(value.Get("typeName.TypeName.names"))
+			column.Type = parseJsonColumnTypeName(value.Get("typeName.TypeName"))
 
 			constraints := value.Get("constraints")
 			if constraints.Exists() {
@@ -206,7 +206,7 @@ func parseJsonValueTypeExpr(result gjson.Result, val string) defaultType {
 			x = parseJsonValueTypeExpr(valType, value.Raw)
 			return true
 		})
-		x.Type = parseJsonColumnTypeName(gjson.Get(val, "typeName.TypeName.names"))
+		x.Type = parseJsonColumnTypeName(gjson.Get(val, "typeName.TypeName"))
 		return x
 	case "SQLValueFunction":
 		var x defaultType
@@ -223,11 +223,16 @@ func parseJsonValueTypeExpr(result gjson.Result, val string) defaultType {
 	panic(fmt.Sprintf("unreachable %s", result))
 }
 
-func parseJsonColumnTypeName(typeNames gjson.Result) string {
-	typeIndex := len(typeNames.Array()) - 1
-	x := typeNames.Get(strconv.Itoa(typeIndex) + ".String.str").String()
+func parseJsonColumnTypeName(typeName gjson.Result) string {
+	names := typeName.Get("names")
+	typeIndex := len(names.Array()) - 1
+	x := names.Get(strconv.Itoa(typeIndex) + ".String.str").String()
 	if x == "" {
 		panic("type name not found")
+	}
+
+	if typeName.Get("arrayBounds").Exists() {
+		return x + "[]"
 	}
 	return x
 }

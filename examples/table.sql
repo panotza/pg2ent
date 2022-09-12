@@ -64,3 +64,10 @@ create table kv_settings (
     value varchar not null,
     primary key (id)
 );
+
+create table student_groups (
+    id            bigserial,
+    name          varchar     not null,
+    student_ids   bigint[]    not null default '{}',
+    primary key (id)
+);

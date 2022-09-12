@@ -11,6 +11,7 @@ type:
   int2: field.Int("%s")
   int4: field.Int("%s")
   int8: field.Int64("%s")
+  int8[]: BIGINT_ARRAY
   bigserial: field.Int64("%s")
   float8: field.Float("%s")
   uuid: field.UUID("%s", uuid.UUID{})
@@ -43,6 +44,14 @@ define:
     schema-type: |-
       map[string]string{
         dialect.Postgres: "decimal",
+      }
+  BIGINT_ARRAY:
+    field: field.Other("%s", pq.Int64Array{})
+    imports:
+      - github.com/lib/pq
+    schema-type: |-
+      map[string]string{
+        dialect.Postgres: "bigint[]",
       }
 
 overrides:
